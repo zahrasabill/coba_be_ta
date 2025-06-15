@@ -14,16 +14,33 @@ use Illuminate\Support\Facades\DB;
 /**
  * @OA\Tag(
  *     name="Penanganan",
- *     description="API Endpoints untuk manajemen penanganan medis"
+ *     description="API Endpoints untuk manajemen penanganan medis - Hanya untuk Dokter"
  * )
  */
 class PenangananController extends Controller
 {
     /**
+     * Constructor untuk middleware role check
+     */
+    public function __construct()
+    {
+        // Middleware untuk memastikan hanya dokter yang bisa mengakses
+        $this->middleware(function ($request, $next) {
+            if (!auth()->user()->hasRole('dokter')) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Akses ditolak. Hanya dokter yang dapat mengakses menu penanganan.'
+                ], 403);
+            }
+            return $next($request);
+        });
+    }
+
+    /**
      * @OA\Get(
      *     path="/api/penanganan",
      *     summary="Mendapatkan daftar penanganan",
-     *     description="Dokter dapat melihat semua penanganan, Pasien hanya melihat penanganan miliknya",
+     *     description="Hanya dokter yang dapat melihat daftar penanganan",
      *     tags={"Penanganan"},
      *     security={{"bearerAuth":{}}},
      *     @OA\Parameter(
@@ -47,6 +64,13 @@ class PenangananController extends Controller
      *         required=false,
      *         @OA\Schema(type="string", format="date")
      *     ),
+     *     @OA\Parameter(
+     *         name="my_patients",
+     *         in="query",
+     *         description="Filter hanya pasien yang ditangani dokter ini",
+     *         required=false,
+     *         @OA\Schema(type="boolean")
+     *     ),
      *     @OA\Response(
      *         response=200,
      *         description="Berhasil mengambil data penanganan",
@@ -55,6 +79,10 @@ class PenangananController extends Controller
      *             @OA\Property(property="message", type="string", example="Data penanganan berhasil diambil"),
      *             @OA\Property(property="data", type="array", @OA\Items(ref="#/components/schemas/PenangananResource"))
      *         )
+     *     ),
+     *     @OA\Response(
+     *         response=403,
+     *         description="Akses ditolak - Hanya dokter yang dapat mengakses"
      *     )
      * )
      */
@@ -63,15 +91,9 @@ class PenangananController extends Controller
         $user = auth()->user();
         $query = Penanganan::with(['pasien', 'dokter']);
 
-        // Role-based filtering menggunakan roles dari Spatie
-        if ($user->hasRole('pasien')) {
-            // Pasien hanya bisa melihat penanganan miliknya
-            $query->forPatient($user->id);
-        } elseif ($user->hasRole('dokter')) {
-            // Dokter bisa melihat semua penanganan atau yang dia tangani
-            if ($request->has('user')) {
-                $query->byDokter($user->id);
-            }
+        // Dokter bisa melihat semua penanganan atau hanya yang dia tangani
+        if ($request->boolean('my_patients')) {
+            $query->byDokter($user->id);
         }
 
         // Apply filters
@@ -131,6 +153,10 @@ class PenangananController extends Controller
      *             @OA\Property(property="message", type="string", example="Penanganan berhasil dibuat"),
      *             @OA\Property(property="data", ref="#/components/schemas/PenangananResource")
      *         )
+     *     ),
+     *     @OA\Response(
+     *         response=403,
+     *         description="Akses ditolak - Hanya dokter yang dapat mengakses"
      *     ),
      *     @OA\Response(
      *         response=422,
@@ -210,6 +236,7 @@ class PenangananController extends Controller
      * @OA\Get(
      *     path="/api/penanganan/{id}",
      *     summary="Mendapatkan detail penanganan",
+     *     description="Hanya dokter yang dapat melihat detail penanganan",
      *     tags={"Penanganan"},
      *     security={{"bearerAuth":{}}},
      *     @OA\Parameter(
@@ -226,20 +253,20 @@ class PenangananController extends Controller
      *             @OA\Property(property="message", type="string", example="Detail penanganan berhasil diambil"),
      *             @OA\Property(property="data", ref="#/components/schemas/PenangananResource")
      *         )
+     *     ),
+     *     @OA\Response(
+     *         response=403,
+     *         description="Akses ditolak - Hanya dokter yang dapat mengakses"
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="Penanganan tidak ditemukan"
      *     )
      * )
      */
     public function show($id): JsonResponse
     {
-        $user = Auth::user();
-        $query = Penanganan::with(['pasien', 'dokter']);
-
-        // Role-based access control menggunakan Spatie roles
-        if ($user->hasRole('pasien')) {
-            $query->forPatient($user->id);
-        }
-
-        $penanganan = $query->find($id);
+        $penanganan = Penanganan::with(['pasien', 'dokter'])->find($id);
 
         if (!$penanganan) {
             return response()->json([
@@ -283,6 +310,10 @@ class PenangananController extends Controller
      *     @OA\Response(
      *         response=200,
      *         description="Penanganan berhasil diupdate"
+     *     ),
+     *     @OA\Response(
+     *         response=403,
+     *         description="Akses ditolak - Hanya dokter yang dapat mengakses"
      *     )
      * )
      */
@@ -360,6 +391,10 @@ class PenangananController extends Controller
      *     @OA\Response(
      *         response=200,
      *         description="Penanganan berhasil dihapus"
+     *     ),
+     *     @OA\Response(
+     *         response=403,
+     *         description="Akses ditolak - Hanya dokter yang dapat mengakses"
      *     )
      * )
      */
@@ -392,45 +427,34 @@ class PenangananController extends Controller
 
     /**
      * @OA\Get(
-     *     path="/api/penanganan/statistik",
-     *     summary="Mendapatkan statistik penanganan",
-     *     description="Hanya dokter yang dapat melihat statistik",
+     *     path="/api/penanganan/pasien-list",
+     *     summary="Mendapatkan daftar pasien untuk dropdown",
+     *     description="Hanya dokter yang dapat melihat daftar pasien",
      *     tags={"Penanganan"},
      *     security={{"bearerAuth":{}}},
      *     @OA\Response(
      *         response=200,
-     *         description="Statistik berhasil diambil"
+     *         description="Daftar pasien berhasil diambil"
+     *     ),
+     *     @OA\Response(
+     *         response=403,
+     *         description="Akses ditolak - Hanya dokter yang dapat mengakses"
      *     )
      * )
      */
-    public function statistik(): JsonResponse
+    public function getPasienList(): JsonResponse
     {
-        $user = Auth::user();
-        $query = Penanganan::query();
-
-        // Filter berdasarkan dokter jika diperlukan
-        if ($user->hasRole('dokter')) {
-            $query->byDokter($user->id);
-        }
-
-        $statistik = [
-            'total_penanganan' => $query->count(),
-            'pending' => $query->clone()->withStatus('pending')->count(),
-            'selesai' => $query->clone()->withStatus('selesai')->count(),
-            'dibatalkan' => $query->clone()->withStatus('dibatalkan')->count(),
-            'bulan_ini' => $query->clone()->whereMonth('tanggal_penanganan', now()->month)
-                                   ->whereYear('tanggal_penanganan', now()->year)
-                                   ->count(),
-            'minggu_ini' => $query->clone()->whereBetween('tanggal_penanganan', [
-                now()->startOfWeek(),
-                now()->endOfWeek()
-            ])->count(),
-        ];
+        $pasienList = User::whereHas('roles', function($query) {
+                          $query->where('name', 'pasien');
+                      })
+                      ->select('id', 'name', 'email')
+                      ->orderBy('name')
+                      ->get();
 
         return response()->json([
             'success' => true,
-            'message' => 'Statistik berhasil diambil',
-            'data' => $statistik
+            'message' => 'Daftar pasien berhasil diambil',
+            'data' => $pasienList
         ]);
     }
 }

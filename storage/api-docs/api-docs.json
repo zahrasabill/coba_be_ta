@@ -93,7 +93,7 @@
                     "Penanganan"
                 ],
                 "summary": "Mendapatkan daftar penanganan",
-                "description": "Dokter dapat melihat semua penanganan, Pasien hanya melihat penanganan miliknya",
+                "description": "Hanya dokter yang dapat melihat daftar penanganan",
                 "operationId": "28f0e17a38f73aa3af72d86c18bed6a0",
                 "parameters": [
                     {
@@ -129,6 +129,15 @@
                             "type": "string",
                             "format": "date"
                         }
+                    },
+                    {
+                        "name": "my_patients",
+                        "in": "query",
+                        "description": "Filter hanya pasien yang ditangani dokter ini",
+                        "required": false,
+                        "schema": {
+                            "type": "boolean"
+                        }
                     }
                 ],
                 "responses": {
@@ -157,6 +166,9 @@
                                 }
                             }
                         }
+                    },
+                    "403": {
+                        "description": "Akses ditolak - Hanya dokter yang dapat mengakses"
                     }
                 },
                 "security": [
@@ -258,6 +270,9 @@
                             }
                         }
                     },
+                    "403": {
+                        "description": "Akses ditolak - Hanya dokter yang dapat mengakses"
+                    },
                     "422": {
                         "description": "Validation error"
                     }
@@ -275,6 +290,7 @@
                     "Penanganan"
                 ],
                 "summary": "Mendapatkan detail penanganan",
+                "description": "Hanya dokter yang dapat melihat detail penanganan",
                 "operationId": "d1249e57505612ad68dc24a8a2a11800",
                 "parameters": [
                     {
@@ -309,6 +325,12 @@
                                 }
                             }
                         }
+                    },
+                    "403": {
+                        "description": "Akses ditolak - Hanya dokter yang dapat mengakses"
+                    },
+                    "404": {
+                        "description": "Penanganan tidak ditemukan"
                     }
                 },
                 "security": [
@@ -381,6 +403,9 @@
                 "responses": {
                     "200": {
                         "description": "Penanganan berhasil diupdate"
+                    },
+                    "403": {
+                        "description": "Akses ditolak - Hanya dokter yang dapat mengakses"
                     }
                 },
                 "security": [
@@ -409,6 +434,9 @@
                 "responses": {
                     "200": {
                         "description": "Penanganan berhasil dihapus"
+                    },
+                    "403": {
+                        "description": "Akses ditolak - Hanya dokter yang dapat mengakses"
                     }
                 },
                 "security": [
@@ -418,17 +446,20 @@
                 ]
             }
         },
-        "/api/penanganan/statistik": {
+        "/api/penanganan/pasien-list": {
             "get": {
                 "tags": [
                     "Penanganan"
                 ],
-                "summary": "Mendapatkan statistik penanganan",
-                "description": "Hanya dokter yang dapat melihat statistik",
-                "operationId": "99d30b520491bd50b6477990a5a83822",
+                "summary": "Mendapatkan daftar pasien untuk dropdown",
+                "description": "Hanya dokter yang dapat melihat daftar pasien",
+                "operationId": "362a0bc725e4a6229b9038dda8c39601",
                 "responses": {
                     "200": {
-                        "description": "Statistik berhasil diambil"
+                        "description": "Daftar pasien berhasil diambil"
+                    },
+                    "403": {
+                        "description": "Akses ditolak - Hanya dokter yang dapat mengakses"
                     }
                 },
                 "security": [
@@ -1533,7 +1564,7 @@
         },
         {
             "name": "Penanganan",
-            "description": "API Endpoints untuk manajemen penanganan medis"
+            "description": "API Endpoints untuk manajemen penanganan medis - Hanya untuk Dokter"
         },
         {
             "name": "User",
