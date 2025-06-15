@@ -1,0 +1,1553 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "EarScope API",
+        "description": "Dokumentasi API untuk EarScope",
+        "version": "1.0"
+    },
+    "paths": {
+        "/v1/login": {
+            "post": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Login User",
+                "operationId": "7abb047ced1329103f0767160e852fc9",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "kode_akses",
+                                    "password"
+                                ],
+                                "properties": {
+                                    "kode_akses": {
+                                        "type": "string",
+                                        "format": "string",
+                                        "example": "ERS-736521"
+                                    },
+                                    "password": {
+                                        "type": "string",
+                                        "format": "password",
+                                        "example": "password123"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Login success"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                }
+            }
+        },
+        "/v1/logout": {
+            "post": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Logout User",
+                "operationId": "fb4913f284432ecf8c1394ad6c99a14e",
+                "responses": {
+                    "200": {
+                        "description": "Logged out successfully"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/v1/refresh": {
+            "post": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Refresh JWT Token",
+                "operationId": "5a69b0db2ba666122033a1ee3e9e582e",
+                "responses": {
+                    "200": {
+                        "description": "Token refreshed"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/penanganan": {
+            "get": {
+                "tags": [
+                    "Penanganan"
+                ],
+                "summary": "Mendapatkan daftar penanganan",
+                "description": "Dokter dapat melihat semua penanganan, Pasien hanya melihat penanganan miliknya",
+                "operationId": "28f0e17a38f73aa3af72d86c18bed6a0",
+                "parameters": [
+                    {
+                        "name": "status",
+                        "in": "query",
+                        "description": "Filter berdasarkan status",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "pending",
+                                "selesai",
+                                "dibatalkan"
+                            ]
+                        }
+                    },
+                    {
+                        "name": "tanggal_mulai",
+                        "in": "query",
+                        "description": "Filter tanggal mulai (Y-m-d)",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    },
+                    {
+                        "name": "tanggal_akhir",
+                        "in": "query",
+                        "description": "Filter tanggal akhir (Y-m-d)",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Berhasil mengambil data penanganan",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Data penanganan berhasil diambil"
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/PenangananResource"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Penanganan"
+                ],
+                "summary": "Membuat penanganan baru",
+                "description": "Hanya dokter yang dapat membuat penanganan baru",
+                "operationId": "f91cae4ee2f5d6eb1deda846865bf5c3",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "user_id",
+                                    "tanggal_penanganan",
+                                    "keluhan",
+                                    "telinga_terkena"
+                                ],
+                                "properties": {
+                                    "user_id": {
+                                        "description": "ID pasien",
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "tanggal_penanganan": {
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "2025-06-15"
+                                    },
+                                    "keluhan": {
+                                        "type": "string",
+                                        "example": "Telinga terasa sakit dan berdengung"
+                                    },
+                                    "riwayat_penyakit": {
+                                        "type": "string",
+                                        "example": "Pernah mengalami infeksi telinga"
+                                    },
+                                    "diagnosis_manual": {
+                                        "type": "string",
+                                        "example": "Otitis media akut"
+                                    },
+                                    "telinga_terkena": {
+                                        "type": "string",
+                                        "enum": [
+                                            "kiri",
+                                            "kanan",
+                                            "keduanya"
+                                        ],
+                                        "example": "kiri"
+                                    },
+                                    "tindakan": {
+                                        "type": "string",
+                                        "example": "Pemberian antibiotik dan tetes telinga"
+                                    },
+                                    "status": {
+                                        "type": "string",
+                                        "enum": [
+                                            "pending",
+                                            "selesai",
+                                            "dibatalkan"
+                                        ],
+                                        "example": "pending"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Penanganan berhasil dibuat",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Penanganan berhasil dibuat"
+                                        },
+                                        "data": {
+                                            "$ref": "#/components/schemas/PenangananResource"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/penanganan/{id}": {
+            "get": {
+                "tags": [
+                    "Penanganan"
+                ],
+                "summary": "Mendapatkan detail penanganan",
+                "operationId": "d1249e57505612ad68dc24a8a2a11800",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Detail penanganan berhasil diambil",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Detail penanganan berhasil diambil"
+                                        },
+                                        "data": {
+                                            "$ref": "#/components/schemas/PenangananResource"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "Penanganan"
+                ],
+                "summary": "Mengupdate penanganan",
+                "description": "Hanya dokter yang dapat mengupdate penanganan",
+                "operationId": "b88240be9fcc2ea428ad9ce6b0761409",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "tanggal_penanganan": {
+                                        "type": "string",
+                                        "format": "date"
+                                    },
+                                    "keluhan": {
+                                        "type": "string"
+                                    },
+                                    "riwayat_penyakit": {
+                                        "type": "string"
+                                    },
+                                    "diagnosis_manual": {
+                                        "type": "string"
+                                    },
+                                    "telinga_terkena": {
+                                        "type": "string",
+                                        "enum": [
+                                            "kiri",
+                                            "kanan",
+                                            "keduanya"
+                                        ]
+                                    },
+                                    "tindakan": {
+                                        "type": "string"
+                                    },
+                                    "status": {
+                                        "type": "string",
+                                        "enum": [
+                                            "pending",
+                                            "selesai",
+                                            "dibatalkan"
+                                        ]
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Penanganan berhasil diupdate"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Penanganan"
+                ],
+                "summary": "Menghapus penanganan",
+                "description": "Hanya dokter yang dapat menghapus penanganan",
+                "operationId": "b52d1257d63f9e689166ae63d890532a",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Penanganan berhasil dihapus"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/penanganan/statistik": {
+            "get": {
+                "tags": [
+                    "Penanganan"
+                ],
+                "summary": "Mendapatkan statistik penanganan",
+                "description": "Hanya dokter yang dapat melihat statistik",
+                "operationId": "99d30b520491bd50b6477990a5a83822",
+                "responses": {
+                    "200": {
+                        "description": "Statistik berhasil diambil"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/v1/register/pasien": {
+            "post": {
+                "tags": [
+                    "User"
+                ],
+                "summary": "Register a new pasien",
+                "operationId": "1d0c0ab5739307e0b25ebbd038c11254",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "name",
+                                    "tanggal_lahir",
+                                    "gender",
+                                    "no_telp"
+                                ],
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "example": "John Doe"
+                                    },
+                                    "tanggal_lahir": {
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "2012-12-31"
+                                    },
+                                    "gender": {
+                                        "description": "Jenis kelamin, hanya diisi 'laki-laki' atau 'perempuan'",
+                                        "type": "string",
+                                        "example": "laki-laki"
+                                    },
+                                    "no_telp": {
+                                        "description": "Nomor telepon, hanya angka, 10 sampai 15 digit",
+                                        "type": "string",
+                                        "example": "081234567890"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "User registered successfully"
+                    },
+                    "400": {
+                        "description": "Validation error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "The given data was invalid."
+                                        },
+                                        "errors": {
+                                            "properties": {
+                                                "name": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "string",
+                                                        "example": "Nama sudah terdaftar, silakan gunakan nama lain."
+                                                    }
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/register/dokter": {
+            "post": {
+                "tags": [
+                    "User"
+                ],
+                "summary": "Register a new dokter",
+                "operationId": "67328887bff28886787b4af930d4bacd",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "name",
+                                    "tanggal_lahir",
+                                    "gender",
+                                    "no_telp"
+                                ],
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "example": "John Doe"
+                                    },
+                                    "tanggal_lahir": {
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "2012-12-31"
+                                    },
+                                    "gender": {
+                                        "description": "Jenis kelamin, hanya diisi 'laki-laki' atau 'perempuan'",
+                                        "type": "string",
+                                        "example": "laki-laki"
+                                    },
+                                    "no_telp": {
+                                        "description": "Nomor telepon, hanya angka, 10 sampai 15 digit",
+                                        "type": "string",
+                                        "example": "081234567890"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "User registered successfully"
+                    },
+                    "400": {
+                        "description": "Validation error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "The given data was invalid."
+                                        },
+                                        "errors": {
+                                            "properties": {
+                                                "name": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "string",
+                                                        "example": "Nama sudah terdaftar, silakan gunakan nama lain."
+                                                    }
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/users/{id}": {
+            "get": {
+                "tags": [
+                    "User"
+                ],
+                "summary": "Get user by ID",
+                "operationId": "e2a9e9265f7be93b919519df96b87cb7",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "User details",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "id": {
+                                            "type": "integer"
+                                        },
+                                        "name": {
+                                            "type": "string"
+                                        },
+                                        "email": {
+                                            "type": "string"
+                                        },
+                                        "roles": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "string"
+                                            }
+                                        },
+                                        "deleted_at": {
+                                            "type": "string",
+                                            "format": "date-time",
+                                            "nullable": true
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "User not found"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "User"
+                ],
+                "summary": "Update User",
+                "operationId": "81fadd62a4c882784f05f43316994719",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": false,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "example": "John Doe Updated"
+                                    },
+                                    "email": {
+                                        "type": "string",
+                                        "format": "email",
+                                        "example": "new.email@example.com"
+                                    },
+                                    "no_telp": {
+                                        "type": "string",
+                                        "example": "08122751"
+                                    },
+                                    "tanggal_lahir": {
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "1995-05-15"
+                                    },
+                                    "role": {
+                                        "type": "string",
+                                        "enum": [
+                                            "user",
+                                            "dokter",
+                                            "admin"
+                                        ],
+                                        "example": "dokter"
+                                    },
+                                    "password": {
+                                        "type": "string",
+                                        "maxLength": 8,
+                                        "minLength": 8,
+                                        "example": "newpassword"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "User updated successfully"
+                    },
+                    "404": {
+                        "description": "User not found"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "User"
+                ],
+                "summary": "Delete User",
+                "operationId": "8cd12cca3384ea9f9253cbf168d28789",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "User deleted successfully"
+                    },
+                    "404": {
+                        "description": "User not found"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/v1/me": {
+            "get": {
+                "tags": [
+                    "User"
+                ],
+                "summary": "Get authenticated user",
+                "operationId": "b32adad160e96976779040f9684ccb22",
+                "responses": {
+                    "200": {
+                        "description": "Authenticated user data",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "id": {
+                                            "type": "integer"
+                                        },
+                                        "name": {
+                                            "type": "string"
+                                        },
+                                        "email": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/v1/pasien": {
+            "get": {
+                "tags": [
+                    "User"
+                ],
+                "summary": "Get all pasien",
+                "operationId": "38ffdb85192c1e00fca9886d8680a751",
+                "responses": {
+                    "200": {
+                        "description": "List of all users",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "properties": {
+                                            "id": {
+                                                "type": "integer"
+                                            },
+                                            "name": {
+                                                "type": "string"
+                                            },
+                                            "email": {
+                                                "type": "string"
+                                            },
+                                            "roles": {
+                                                "type": "array",
+                                                "items": {
+                                                    "type": "string"
+                                                }
+                                            },
+                                            "deleted_at": {
+                                                "type": "string",
+                                                "format": "date-time",
+                                                "nullable": true
+                                            }
+                                        },
+                                        "type": "object"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/v1/dokter": {
+            "get": {
+                "tags": [
+                    "User"
+                ],
+                "summary": "Get all dokter",
+                "operationId": "33be195307cb462d2aa95ab5b5845ad8",
+                "responses": {
+                    "200": {
+                        "description": "List of all users",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "properties": {
+                                            "id": {
+                                                "type": "integer"
+                                            },
+                                            "name": {
+                                                "type": "string"
+                                            },
+                                            "email": {
+                                                "type": "string"
+                                            },
+                                            "roles": {
+                                                "type": "array",
+                                                "items": {
+                                                    "type": "string"
+                                                }
+                                            },
+                                            "deleted_at": {
+                                                "type": "string",
+                                                "format": "date-time",
+                                                "nullable": true
+                                            }
+                                        },
+                                        "type": "object"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/v1/users/{id}/force-delete": {
+            "delete": {
+                "tags": [
+                    "User"
+                ],
+                "summary": "Permanently delete a user",
+                "operationId": "83015cd4500e57fea8350f9a726e60d1",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "User permanently deleted successfully"
+                    },
+                    "404": {
+                        "description": "User not found"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/v1/users/{id}/restore": {
+            "post": {
+                "tags": [
+                    "User"
+                ],
+                "summary": "Restore a soft deleted user",
+                "operationId": "74ef9272bd28fb028e3225ad06f44cbd",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "User restored successfully"
+                    },
+                    "404": {
+                        "description": "User not found"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/v1/videos": {
+            "get": {
+                "tags": [
+                    "Videos"
+                ],
+                "summary": "Get all videos",
+                "operationId": "2dd39694f233ae275064d4e27e73aea0",
+                "parameters": [
+                    {
+                        "name": "date",
+                        "in": "query",
+                        "description": "Filter videos by created date (format: YYYY-MM-DD)",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "List of all videos",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "properties": {
+                                            "id": {
+                                                "type": "integer"
+                                            },
+                                            "raw_video_url": {
+                                                "type": "string"
+                                            },
+                                            "processed_video_url": {
+                                                "type": "string"
+                                            },
+                                            "status": {
+                                                "type": "string"
+                                            },
+                                            "user": {
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "integer"
+                                                    },
+                                                    "name": {
+                                                        "type": "string"
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        },
+                                        "type": "object"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Videos"
+                ],
+                "summary": "Upload a pair of videos (raw and processed)",
+                "operationId": "766f06dc2935b23771613a91839bb1a1",
+                "requestBody": {
+                    "description": "Upload raw and processed videos",
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "required": [
+                                    "raw_video",
+                                    "processed_video"
+                                ],
+                                "properties": {
+                                    "raw_video": {
+                                        "description": "Raw video file",
+                                        "type": "string",
+                                        "format": "binary"
+                                    },
+                                    "processed_video": {
+                                        "description": "Processed video file with bounding box",
+                                        "type": "string",
+                                        "format": "binary"
+                                    },
+                                    "hasil_diagnosis": {
+                                        "description": "Diagnosis result of the video (optional)",
+                                        "type": "string"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Videos uploaded successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer"
+                                                },
+                                                "raw_video_path": {
+                                                    "type": "string"
+                                                },
+                                                "processed_video_path": {
+                                                    "type": "string"
+                                                },
+                                                "status": {
+                                                    "type": "string"
+                                                },
+                                                "hasil_diagnosis": {
+                                                    "description": "Diagnosis result of the video",
+                                                    "type": "string"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/v1/videos/{videoId}/assign/{userId}": {
+            "post": {
+                "tags": [
+                    "Videos"
+                ],
+                "summary": "Assign a video to a user",
+                "operationId": "ea5bac4dbe008179d0e71352b804c1ef",
+                "parameters": [
+                    {
+                        "name": "videoId",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "userId",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Video assigned successfully"
+                    },
+                    "404": {
+                        "description": "Video or User not found"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/v1/videos/{videoId}": {
+            "patch": {
+                "tags": [
+                    "Videos"
+                ],
+                "summary": "Unassign a video",
+                "operationId": "3ab86baf997ffc3d718acfe4a42cce06",
+                "parameters": [
+                    {
+                        "name": "videoId",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Video unassigned successfully"
+                    },
+                    "404": {
+                        "description": "Video not found"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/videos/{videoId}/keterangan": {
+            "patch": {
+                "tags": [
+                    "Videos"
+                ],
+                "summary": "Update keterangan video",
+                "operationId": "22c90b7440129cb3b27fb35efe70d587",
+                "parameters": [
+                    {
+                        "name": "videoId",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "keterangan": {
+                                        "type": "string",
+                                        "example": "Diagnosis manual"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Success"
+                    }
+                }
+            }
+        },
+        "/v1/videos/pasien": {
+            "get": {
+                "tags": [
+                    "Videos"
+                ],
+                "summary": "Get videos assigned to a specific patient",
+                "operationId": "5dc897dbfd7ee4ac302abdd46029fdf5",
+                "parameters": [
+                    {
+                        "name": "user_id",
+                        "in": "query",
+                        "description": "Filter videos by assigned patient ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "example": 3
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "List of videos assigned to the specified patient",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "properties": {
+                                            "id": {
+                                                "type": "integer"
+                                            },
+                                            "user_id": {
+                                                "type": "integer"
+                                            },
+                                            "raw_video_url": {
+                                                "type": "string"
+                                            },
+                                            "processed_video_url": {
+                                                "type": "string"
+                                            },
+                                            "status": {
+                                                "type": "string"
+                                            },
+                                            "hasil_diagnosis": {
+                                                "type": "string"
+                                            },
+                                            "keterangan": {
+                                                "type": "string",
+                                                "nullable": true
+                                            },
+                                            "created_at": {
+                                                "type": "string",
+                                                "format": "date-time"
+                                            },
+                                            "updated_at": {
+                                                "type": "string",
+                                                "format": "date-time"
+                                            },
+                                            "user": {
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "integer"
+                                                    },
+                                                    "name": {
+                                                        "type": "string"
+                                                    },
+                                                    "kode_akses": {
+                                                        "type": "string"
+                                                    },
+                                                    "tanggal_lahir": {
+                                                        "type": "string",
+                                                        "format": "date"
+                                                    },
+                                                    "usia": {
+                                                        "type": "integer"
+                                                    },
+                                                    "gender": {
+                                                        "type": "string"
+                                                    },
+                                                    "no_telp": {
+                                                        "type": "string"
+                                                    },
+                                                    "email": {
+                                                        "type": "string",
+                                                        "format": "email"
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        },
+                                        "type": "object"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "User ID is required"
+                    },
+                    "404": {
+                        "description": "Patient not found"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "PenangananResource": {
+                "title": "Penanganan Resource",
+                "description": "Resource untuk data penanganan medis",
+                "properties": {
+                    "id": {
+                        "description": "ID penanganan",
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "user_id": {
+                        "description": "ID pasien",
+                        "type": "integer",
+                        "example": 2
+                    },
+                    "dokter_id": {
+                        "description": "ID dokter",
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "tanggal_penanganan": {
+                        "description": "Tanggal penanganan",
+                        "type": "string",
+                        "format": "date",
+                        "example": "2025-06-15"
+                    },
+                    "keluhan": {
+                        "description": "Keluhan pasien",
+                        "type": "string",
+                        "example": "Telinga terasa sakit dan berdengung"
+                    },
+                    "riwayat_penyakit": {
+                        "description": "Riwayat penyakit pasien",
+                        "type": "string",
+                        "example": "Pernah mengalami infeksi telinga"
+                    },
+                    "diagnosis_manual": {
+                        "description": "Diagnosis manual dari dokter",
+                        "type": "string",
+                        "example": "Otitis media akut"
+                    },
+                    "telinga_terkena": {
+                        "description": "Telinga yang terkena",
+                        "type": "string",
+                        "enum": [
+                            "kiri",
+                            "kanan",
+                            "keduanya"
+                        ],
+                        "example": "kiri"
+                    },
+                    "tindakan": {
+                        "description": "Tindakan yang diberikan",
+                        "type": "string",
+                        "example": "Pemberian antibiotik dan tetes telinga"
+                    },
+                    "status": {
+                        "description": "Status penanganan",
+                        "type": "string",
+                        "enum": [
+                            "pending",
+                            "selesai",
+                            "dibatalkan"
+                        ],
+                        "example": "pending"
+                    },
+                    "created_at": {
+                        "description": "Waktu dibuat",
+                        "type": "string",
+                        "format": "datetime",
+                        "example": "2025-06-15T10:30:00Z"
+                    },
+                    "updated_at": {
+                        "description": "Waktu diupdate",
+                        "type": "string",
+                        "format": "datetime",
+                        "example": "2025-06-15T10:30:00Z"
+                    },
+                    "pasien": {
+                        "description": "Data pasien",
+                        "properties": {
+                            "id": {
+                                "type": "integer",
+                                "example": 2
+                            },
+                            "name": {
+                                "type": "string",
+                                "example": "John Doe"
+                            },
+                            "kode_akses": {
+                                "type": "string",
+                                "example": "PRS-ABC12"
+                            },
+                            "tanggal_lahir": {
+                                "type": "string",
+                                "format": "date",
+                                "example": "1990-05-15"
+                            },
+                            "usia": {
+                                "type": "integer",
+                                "example": 35
+                            },
+                            "gender": {
+                                "type": "string",
+                                "example": "laki-laki"
+                            },
+                            "no_telp": {
+                                "type": "string",
+                                "example": "081234567890"
+                            }
+                        },
+                        "type": "object"
+                    },
+                    "dokter": {
+                        "description": "Data dokter",
+                        "properties": {
+                            "id": {
+                                "type": "integer",
+                                "example": 1
+                            },
+                            "name": {
+                                "type": "string",
+                                "example": "Dr. Jane Smith"
+                            },
+                            "kode_akses": {
+                                "type": "string",
+                                "example": "DRS-XYZ98"
+                            },
+                            "tanggal_lahir": {
+                                "type": "string",
+                                "format": "date",
+                                "example": "1980-03-20"
+                            },
+                            "usia": {
+                                "type": "integer",
+                                "example": 45
+                            },
+                            "gender": {
+                                "type": "string",
+                                "example": "perempuan"
+                            },
+                            "no_telp": {
+                                "type": "string",
+                                "example": "081234567891"
+                            },
+                            "no_str": {
+                                "type": "string",
+                                "example": "STR123456"
+                            }
+                        },
+                        "type": "object"
+                    }
+                },
+                "type": "object"
+            }
+        },
+        "securitySchemes": {
+            "bearerAuth": {
+                "type": "http",
+                "scheme": "bearer",
+                "bearerFormat": "JWT",
+                "description": "Masukkan token di kolom ini dengan format Bearer <token>"
+            }
+        }
+    },
+    "tags": [
+        {
+            "name": "Auth",
+            "description": "Authentication management endpoints",
+            "x-order": 2
+        },
+        {
+            "name": "Penanganan",
+            "description": "API Endpoints untuk manajemen penanganan medis"
+        },
+        {
+            "name": "User",
+            "description": "User management endpoints",
+            "x-order": 2
+        },
+        {
+            "name": "Videos",
+            "description": "Videos"
+        }
+    ],
+    "security": [
+        {
+            "bearerAuth": []
+        }
+    ]
+}
